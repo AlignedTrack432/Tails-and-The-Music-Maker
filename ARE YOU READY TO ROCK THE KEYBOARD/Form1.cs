@@ -94,8 +94,7 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
                 string mp3FilePath = TrimQuotes(textBox1.Text);
                 textBox1.Text = mp3FilePath;
 
-                string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                string filePath = Path.Combine(desktopPath, "Temp.png");
+                string filePath = Path.Combine(Path.GetTempPath(), "MP3PlayerAlbumArtTemp.png");
                 var file = TagLib.File.Create(mp3FilePath);
                 if (file.Tag.Pictures.Length > 0)
                 {
