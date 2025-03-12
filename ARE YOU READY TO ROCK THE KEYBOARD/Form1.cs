@@ -104,9 +104,13 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
                         image.Save(filePath);
                     }
                 }
-                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                if (File.Exists(filePath))
                 {
-                    pictureBox1.Image = Image.FromStream(fs);
+                    using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    {
+                        pictureBox1.Image = Image.FromStream(fs);
+                    }
+                    File.Delete(filePath);
                 }
                 Mp3FileReader reader = new Mp3FileReader(textBox1.Text);
                 TimeSpan duration = reader.TotalTime;
@@ -116,6 +120,14 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
                 var TagLibStuff = TagLib.File.Create(mp3FilePath);
                 label1.Text = TagLibStuff.Tag.Title;
                 label3.Text = TagLibStuff.Tag.Album;
+                if (label1.Text == "")
+                {
+                    label1.Text = "Unknown Title";
+                }
+                if (label3.Text == "")
+                {
+                    label3.Text = "Unknown Album";
+                }
                 CenterElements();
                 StartResizing();
 
