@@ -6,12 +6,12 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
     {
         int isStarted = 0;
         string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-        private WaveOutEvent waveOut;
-        private Mp3FileReader mp3Reader;
+        private WaveOutEvent? waveOut;
+        private Mp3FileReader? mp3Reader;
 
         public Form1()
         {
-            InitializeComponent();
+        InitializeComponent();
             this.Resize += (s, e) => CenterElements();
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
@@ -167,7 +167,7 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
         void AdjustVolume()
         {
             float volume = trackBar1.Value / 100f;
-            waveOut.Volume = volume;
+            waveOut!.Volume = volume;
         }
 
         private string TrimQuotes(string input)
