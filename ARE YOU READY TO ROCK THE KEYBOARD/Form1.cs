@@ -1,4 +1,7 @@
 using NAudio.Wave;
+using System;
+using System.IO;
+using System.Reflection;
 
 namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
 {
@@ -8,6 +11,7 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
         string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         private WaveOutEvent? waveOut;
         private Mp3FileReader? mp3Reader;
+        string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
         public Form1()
         {
@@ -111,6 +115,16 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
                         pictureBox1.Image = Image.FromStream(fs);
                     }
                     File.Delete(filePath);
+                }
+                else
+                {
+                    using (System.IO.Stream stream = this.GetType().Assembly.GetManifestResourceStream("ARE_YOU_READY_TO_ROCK_THE_KEYBOARD.Untitled.png"))
+                    {
+                        // Read the stream into a Bitmap or other image format
+                        Bitmap bitmap = new Bitmap(stream);
+                        // Use the bitmap in your application (e.g., load it into a PictureBox)
+                        pictureBox1.Image = bitmap;
+                    }
                 }
                 Mp3FileReader reader = new Mp3FileReader(textBox1.Text);
                 TimeSpan duration = reader.TotalTime;
