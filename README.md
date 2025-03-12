@@ -1,1 +1,1 @@
-A simple (and terrible) music player made in C# and WinForms, and using NAudio.
+A simple (and terrible) music player made in C# and WinForms, using NAudio.
