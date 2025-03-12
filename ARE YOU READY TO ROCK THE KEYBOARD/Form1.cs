@@ -108,7 +108,6 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
                 {
                     pictureBox1.Image = Image.FromStream(fs);
                 }
-                System.IO.File.Delete(filePath);
                 Mp3FileReader reader = new Mp3FileReader(textBox1.Text);
                 TimeSpan duration = reader.TotalTime;
                 string time = duration.ToString(@"mm\:ss");
@@ -182,7 +181,7 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
             return input;
         }
 
-	void ResizingHelper(int milliseconds)
+        void ResizingHelper(int milliseconds)
         {
             DateTime start = DateTime.Now;
             while ((DateTime.Now - start).TotalMilliseconds < milliseconds)
