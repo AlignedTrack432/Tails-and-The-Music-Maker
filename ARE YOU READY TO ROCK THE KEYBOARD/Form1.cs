@@ -62,19 +62,18 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
         }
         private void StartResizing()
         {
-            this.Height = 160;
-            Thread.Sleep(50);
-            this.Height = 210;
-            Thread.Sleep(30);
-            this.Height = 260;
-            Thread.Sleep(20);
-            this.Height = 310;
-            Thread.Sleep(15);
-            this.Height = 340;
-            Thread.Sleep(10);
-            this.Height = 380;
-            Thread.Sleep(5);
-            this.Height = 395;
+            int[] heights = { 160, 210, 260, 310, 340, 380, 395 };
+            int[] delays = { 50, 30, 20, 15, 10, 5, 0 };
+
+            for (int i = 0; i < heights.Length; i++)
+            {
+                this.Height = heights[i];
+
+                if (i < heights.Length - 1)
+                {
+                    ResizingHelper(delays[i]);
+                }
+            }
         }
 
         void PlayMusic()
@@ -181,6 +180,16 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
                 return input.Substring(1, input.Length - 2);
 
             return input;
+        }
+
+	void ResizingHelper(int milliseconds)
+        {
+            DateTime start = DateTime.Now;
+            while ((DateTime.Now - start).TotalMilliseconds < milliseconds)
+            {
+                Application.DoEvents();
+                Thread.Sleep(5); // Very short sleep
+            }
         }
     }
 }
