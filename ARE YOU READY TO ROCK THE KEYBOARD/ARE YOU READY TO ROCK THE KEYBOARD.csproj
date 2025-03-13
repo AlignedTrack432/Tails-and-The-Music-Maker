@@ -11,6 +11,7 @@
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <Configurations>Debug;Release;a</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
