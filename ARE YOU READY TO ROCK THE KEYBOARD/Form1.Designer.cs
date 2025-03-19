@@ -35,6 +35,7 @@
             label2 = new Label();
             label3 = new Label();
             trackBar1 = new TrackBar();
+            button2 = new Button();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)trackBar1).BeginInit();
             SuspendLayout();
@@ -42,9 +43,9 @@
             // textBox1
             // 
             textBox1.Font = new Font("Comic Sans MS", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            textBox1.Location = new Point(12, 12);
+            textBox1.Location = new Point(12, 13);
             textBox1.Name = "textBox1";
-            textBox1.Size = new Size(352, 26);
+            textBox1.Size = new Size(276, 26);
             textBox1.TabIndex = 0;
             textBox1.TextChanged += textBox1_TextChanged;
             // 
@@ -55,7 +56,7 @@
             button1.Name = "button1";
             button1.Size = new Size(75, 23);
             button1.TabIndex = 1;
-            button1.Text = "start";
+            button1.Text = "Start";
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
@@ -108,11 +109,23 @@
             trackBar1.TabIndex = 9;
             trackBar1.Scroll += trackBar1_Scroll;
             // 
+            // button2
+            // 
+            button2.Font = new Font("Comic Sans MS", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            button2.Location = new Point(294, 13);
+            button2.Name = "button2";
+            button2.Size = new Size(75, 23);
+            button2.TabIndex = 10;
+            button2.Text = "Browse";
+            button2.UseVisualStyleBackColor = true;
+            button2.Click += button2_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(372, 356);
+            ClientSize = new Size(376, 356);
+            Controls.Add(button2);
             Controls.Add(trackBar1);
             Controls.Add(label3);
             Controls.Add(label2);
@@ -138,5 +151,6 @@
         private Label label2;
         private Label label3;
         private TrackBar trackBar1;
+        private Button button2;
     }
 }

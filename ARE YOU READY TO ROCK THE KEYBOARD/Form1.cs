@@ -17,8 +17,7 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
         private System.Windows.Forms.Timer positionTimer;
         string time = "";
         bool isCold = true;
-        private Button selectButton;
-        private OpenFileDialog openFileDialog1;
+        string mp3FilePath = "";
         public Form1()
         {
             InitializeComponent();
@@ -71,7 +70,6 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
             label1.Left = (this.ClientSize.Width - label1.Width) / 2;
             label2.Left = (this.ClientSize.Width - label2.Width) / 2;
             label3.Left = (this.ClientSize.Width - label3.Width) / 2;
-            textBox1.Left = (this.ClientSize.Width - textBox1.Width) / 2;
             trackBar1.Left = (this.ClientSize.Width - trackBar1.Width) / 2;
         }
 
@@ -138,6 +136,100 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
                     }
                 }
                 Mp3FileReader reader = new Mp3FileReader(textBox1.Text);
+                waveOut!.Volume = 0.5F;
+                TimeSpan duration = reader.TotalTime;
+                time = duration.ToString(@"mm\:ss");
+                int secondsInSong = duration.Seconds;
+                var TagLibStuff = TagLib.File.Create(mp3FilePath);
+                label1.Text = TagLibStuff.Tag.Title;
+                string heellooo = TagLibStuff.Tag.Album;
+                if (heellooo.Length > 60)
+                {
+                    int maxLength = 60;
+
+                    string truncatedString = heellooo.Length <= maxLength ? heellooo : heellooo.Substring(0, maxLength);
+
+                    if (heellooo.Length > maxLength)
+                    {
+                        truncatedString += "...";
+                    }
+
+                    label3.Text = truncatedString;
+                }
+                else if (heellooo.Length < 60)
+                {
+                    label3.Text = TagLibStuff.Tag.Album;
+                }
+
+                if (label1.Text == "")
+                {
+                    label1.Text = "Unknown Title";
+                }
+                if (label3.Text == "")
+                {
+                    label3.Text = "Unknown Album";
+                }
+                CenterElements();
+
+                if (isCold == true)
+                {
+                    StartResizing();
+                    isCold = false;
+                }
+
+                isStarted = 1;
+                button1.Text = "Pause";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error has occurred: " + ex);
+            }
+        }
+
+        void FilePickerPlayMusic()
+        {
+            try
+            {
+                if (waveOut != null)
+                {
+                    waveOut.Stop();
+                    waveOut.Dispose();
+                }
+                mp3Reader = new Mp3FileReader(mp3FilePath);
+                waveOut = new WaveOutEvent();
+                waveOut.Init(mp3Reader);
+                waveOut.Play();
+
+                positionTimer.Start();
+
+                string filePath = Path.Combine(Path.GetTempPath(), "MP3PlayerAlbumArtTemp.png");
+                var file = TagLib.File.Create(mp3FilePath);
+                if (file.Tag.Pictures.Length > 0)
+                {
+                    var bin = (byte[])(file.Tag.Pictures[0].Data.Data);
+                    using (var ms = new MemoryStream(bin))
+                    {
+                        var image = Image.FromStream(ms);
+                        image.Save(filePath);
+                    }
+                }
+                if (File.Exists(filePath))
+                {
+                    using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    {
+                        pictureBox1.Image = Image.FromStream(fs);
+                    }
+                    File.Delete(filePath);
+                }
+                else
+                {
+                    using (System.IO.Stream? stream = this.GetType().Assembly.GetManifestResourceStream("ARE_YOU_READY_TO_ROCK_THE_KEYBOARD.Untitled.png"))
+                    {
+                        Bitmap? bitmap = new Bitmap(stream!);
+                        pictureBox1.Image = bitmap;
+                    }
+                }
+                Mp3FileReader reader = new Mp3FileReader(mp3FilePath);
                 waveOut!.Volume = 0.5F;
                 TimeSpan duration = reader.TotalTime;
                 time = duration.ToString(@"mm\:ss");
@@ -278,6 +370,27 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
             int y = (Screen.PrimaryScreen!.WorkingArea.Height - this.Height) / 2;
 
             this.Location = new Point(x, y);
+        }
+
+        void button2_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+
+            // Set the filter for file types
+            openFileDialog.Filter = "MP3 files (*.mp3)|*.mp3|All files (*.*)|*.*";
+            openFileDialog.Title = "Select a File";
+
+            // Show the dialog and check if the user clicked OK
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                // Get the selected file path
+                mp3FilePath = openFileDialog.FileName;
+
+                textBox1.Text = openFileDialog.FileName;
+
+                // You can now use the file path (e.g., display it, read the file, etc.)
+                FilePickerPlayMusic();
+            }
         }
     }
 }
