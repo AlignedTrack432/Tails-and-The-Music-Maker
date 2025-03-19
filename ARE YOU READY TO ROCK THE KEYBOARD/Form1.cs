@@ -1,7 +1,10 @@
 using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 using System;
 using System.IO;
 using System.Reflection;
+using System.Security;
+using System.Windows.Forms;
 
 namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
 {
@@ -11,13 +14,21 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
         string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         private WaveOutEvent? waveOut;
         private Mp3FileReader? mp3Reader;
-
+        private System.Windows.Forms.Timer positionTimer;
+        string time = "";
+        bool isCold = true;
+        private Button selectButton;
+        private OpenFileDialog openFileDialog1;
         public Form1()
         {
-        InitializeComponent();
+            InitializeComponent();
             this.Resize += (s, e) => CenterElements();
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
+
+            positionTimer = new System.Windows.Forms.Timer();
+            positionTimer.Interval = 1000; // Update every second
+            positionTimer.Tick += PositionTimer_Tick!;
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -63,6 +74,7 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
             textBox1.Left = (this.ClientSize.Width - textBox1.Width) / 2;
             trackBar1.Left = (this.ClientSize.Width - trackBar1.Width) / 2;
         }
+
         private void StartResizing()
         {
             int[] heights = { 160, 210, 260, 310, 340, 380, 395 };
@@ -93,6 +105,8 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
                 waveOut.Init(mp3Reader);
                 waveOut.Play();
 
+                positionTimer.Start();
+
                 string mp3FilePath = TrimQuotes(textBox1.Text);
                 textBox1.Text = mp3FilePath;
 
@@ -119,21 +133,36 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
                 {
                     using (System.IO.Stream? stream = this.GetType().Assembly.GetManifestResourceStream("ARE_YOU_READY_TO_ROCK_THE_KEYBOARD.Untitled.png"))
                     {
-                        // Read the stream into a Bitmap or other image format
                         Bitmap? bitmap = new Bitmap(stream!);
-                        // Use the bitmap in your application (e.g., load it into a PictureBox)
                         pictureBox1.Image = bitmap;
                     }
                 }
                 Mp3FileReader reader = new Mp3FileReader(textBox1.Text);
-                waveOut.Volume = 0.5F;
+                waveOut!.Volume = 0.5F;
                 TimeSpan duration = reader.TotalTime;
-                string time = duration.ToString(@"mm\:ss");
-                label2.Text = time;
+                time = duration.ToString(@"mm\:ss");
                 int secondsInSong = duration.Seconds;
                 var TagLibStuff = TagLib.File.Create(mp3FilePath);
                 label1.Text = TagLibStuff.Tag.Title;
-                label3.Text = TagLibStuff.Tag.Album;
+                string heellooo = TagLibStuff.Tag.Album;
+                if (heellooo.Length > 60)
+                {
+                    int maxLength = 60;
+
+                    string truncatedString = heellooo.Length <= maxLength ? heellooo : heellooo.Substring(0, maxLength);
+
+                    if (heellooo.Length > maxLength)
+                    {
+                        truncatedString += "...";
+                    }
+
+                    label3.Text = truncatedString;
+                }
+                else if (heellooo.Length < 60)
+                {
+                    label3.Text = TagLibStuff.Tag.Album;
+                }
+
                 if (label1.Text == "")
                 {
                     label1.Text = "Unknown Title";
@@ -143,14 +172,19 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
                     label3.Text = "Unknown Album";
                 }
                 CenterElements();
-                StartResizing();
+
+                if (isCold == true)
+                {
+                    StartResizing();
+                    isCold = false;
+                }
 
                 isStarted = 1;
                 button1.Text = "Pause";
             }
             catch (Exception ex)
             {
-                MessageBox.Show("An error has occured: " + ex);
+                MessageBox.Show("An error has occurred: " + ex);
             }
         }
 
@@ -171,6 +205,7 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
             textBox1.Text = mp3FilePath;
             isStarted = 0;
             button1.Text = "Start";
+            positionTimer.Stop();
         }
 
         void MusicPaused()
@@ -179,6 +214,7 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
                 waveOut.Pause();
             isStarted = 2;
             button1.Text = "Play";
+            positionTimer.Stop();
         }
 
         void MusicResumed()
@@ -187,6 +223,7 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
                 waveOut.Play();
             button1.Text = "Pause";
             isStarted = 1;
+            positionTimer.Start();
         }
 
         void AdjustVolume()
@@ -214,6 +251,33 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
                 Application.DoEvents();
                 Thread.Sleep(5); // Very short sleep
             }
+        }
+
+        private void PositionTimer_Tick(object sender, EventArgs e)
+        {
+            if (waveOut != null && mp3Reader != null)
+            {
+                // Get the current playback time directly from mp3Reader
+                TimeSpan currentTime = mp3Reader.CurrentTime;
+
+                // Update the label with the current time
+                label2.Text = currentTime.ToString(@"mm\:ss") + "/" + time;
+
+                label2.Left = (this.ClientSize.Width - label2.Width) / 2;
+
+                if (label2.Text == time + "/" + time)
+                {
+                    Restart();
+                }
+            }
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            int x = (Screen.PrimaryScreen!.WorkingArea.Width - this.Width) / 2;
+            int y = (Screen.PrimaryScreen!.WorkingArea.Height - this.Height) / 2;
+
+            this.Location = new Point(x, y);
         }
     }
 }
