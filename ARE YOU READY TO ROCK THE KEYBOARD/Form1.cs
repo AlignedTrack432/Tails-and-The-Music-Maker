@@ -18,6 +18,8 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
         string time = "";
         bool isCold = true;
         string mp3FilePath = "";
+        bool isTextBox1Empty = true;
+        int timestexthasbeenchanged = 0;
         public Form1()
         {
             InitializeComponent();
@@ -33,21 +35,60 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             Restart();
+            if (textBox1.Text != "")
+            {
+                isTextBox1Empty = false;
+                button1.Text = "Start";
+            }
+            else if (textBox1.Text == "")
+            {
+                isTextBox1Empty = true;
+                button1.Text = "Browse";
+            }
+            if (File.Exists(mp3FilePath))
+            {
+                timestexthasbeenchanged++;
+            }
+            if (timestexthasbeenchanged == 2)
+            {
+                timestexthasbeenchanged = 0;
+                isTextBox1Empty = true;
+                button1.Text = "Start";
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (isStarted == 0)
+            // If the text box is empty, open the file dialog
+            if (isTextBox1Empty)
             {
-                PlayMusic();
+                OpenFileDialog openFileDialog = new OpenFileDialog
+                {
+                    Filter = "MP3 files (*.mp3)|*.mp3|All files (*.*)|*.*",
+                    Title = "Select a File"
+                };
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    mp3FilePath = openFileDialog.FileName;
+                    textBox1.Text = mp3FilePath;
+                    PlayMusic(1); // Play music after selecting a file
+                }
             }
-            else if (isStarted == 1)
+            else
             {
-                MusicPaused();
-            }
-            else if (isStarted == 2)
-            {
-                MusicResumed();
+                switch (isStarted)
+                {
+                    case 0:
+                        PlayMusic();
+                        break;
+                    case 1:
+                        MusicPaused();
+                        break;
+                    case 2:
+                        MusicResumed();
+                        break;
+                }
             }
         }
 
@@ -71,6 +112,7 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
             label2.Left = (this.ClientSize.Width - label2.Width) / 2;
             label3.Left = (this.ClientSize.Width - label3.Width) / 2;
             trackBar1.Left = (this.ClientSize.Width - trackBar1.Width) / 2;
+            textBox1.Left = (this.ClientSize.Width - textBox1.Width) / 2;
         }
 
         private void StartResizing()
@@ -89,7 +131,7 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
             }
         }
 
-        void PlayMusic()
+        void PlayMusic(int isGUIPicker = 0)
         {
             try
             {
@@ -98,14 +140,24 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
                     waveOut.Stop();
                     waveOut.Dispose();
                 }
-                mp3Reader = new Mp3FileReader(textBox1.Text);
+                if (isGUIPicker == 0)
+                {
+                    mp3Reader = new Mp3FileReader(textBox1.Text);
+                }
+                else if (isGUIPicker == 1)
+                {
+                    mp3Reader = new Mp3FileReader(mp3FilePath);
+                }
                 waveOut = new WaveOutEvent();
                 waveOut.Init(mp3Reader);
                 waveOut.Play();
 
                 positionTimer.Start();
 
-                string mp3FilePath = TrimQuotes(textBox1.Text);
+                if (isGUIPicker == 0)
+                {
+                    mp3FilePath = TrimQuotes(textBox1.Text);
+                }
                 textBox1.Text = mp3FilePath;
 
                 string filePath = Path.Combine(Path.GetTempPath(), "MP3PlayerAlbumArtTemp.png");
@@ -141,24 +193,42 @@ namespace ARE_YOU_READY_TO_ROCK_THE_KEYBOARD
                 time = duration.ToString(@"mm\:ss");
                 int secondsInSong = duration.Seconds;
                 var TagLibStuff = TagLib.File.Create(mp3FilePath);
-                label1.Text = TagLibStuff.Tag.Title;
-                string heellooo = TagLibStuff.Tag.Album;
-                if (heellooo.Length > 60)
+                string Album = TagLibStuff.Tag.Album;
+                string Title = TagLibStuff.Tag.Title;
+                if (Album.Length > 60)
                 {
                     int maxLength = 60;
 
-                    string truncatedString = heellooo.Length <= maxLength ? heellooo : heellooo.Substring(0, maxLength);
+                    string truncatedString = Album.Length <= maxLength ? Album : Album.Substring(0, maxLength);
 
-                    if (heellooo.Length > maxLength)
+                    if (Album.Length > maxLength)
                     {
                         truncatedString += "...";
                     }
 
                     label3.Text = truncatedString;
                 }
-                else if (heellooo.Length < 60)
+                else if (Album.Length < 60)
                 {
                     label3.Text = TagLibStuff.Tag.Album;
+                }
+
+                if (Title.Length > 60)
+                {
+                    int maxLength = 60;
+
+                    string truncatedString = Title.Length <= maxLength ? Title : Title.Substring(0, maxLength);
+
+                    if (Title.Length > maxLength)
+                    {
+                        truncatedString += "...";
+                    }
+
+                    label1.Text = truncatedString;
+                }
+                else if (Album.Length < 60)
+                {
+                    label1.Text = TagLibStuff.Tag.Album;
                 }
 
                 if (label1.Text == "")
